@@ -20,4 +20,4 @@ Keep directories you've opened in dired, even if you stop running Emacs!
 ```
 
 ### Option for Mac OSX
-While selecting directory path in helm interface, you can also choose where to open the directory, such as Finder, Terminal, or iTerm2, instead of opening in Emacs dired-mode.
+While selecting directory path in helm interface, you can also choose where to open the directory by pressing [TAB] key, the options are, such as Finder, Terminal, or iTerm2, instead of opening in Emacs dired-mode.
