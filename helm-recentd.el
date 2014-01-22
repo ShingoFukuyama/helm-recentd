@@ -63,7 +63,7 @@
                 (const :tag "Sort by frequency" 'frequency))
  :group 'helm-recentd)
 
-(defun helm-recentd-save-to-list ()
+(defun helm-recentd--save-to-list ()
   (let* (($dir (expand-file-name default-directory))
          ($cons (assoc $dir helm-recentd-list))
          ($times (or (cadr $cons) 0))
@@ -89,9 +89,9 @@
                                                           ('frequency 0)
                                                           ('date 1))
                                                         (cdr $elms)))))))
-  (helm-recentd-save-to-file))
+  (helm-recentd--save-to-file))
 
-(defun helm-recentd-save-to-file ()
+(defun helm-recentd--save-to-file ()
   (let ((coding-system-for-write helm-recentd-coding-system))
     (write-region
      (concat "(setq helm-recentd-list '"
@@ -99,14 +99,55 @@
              ")\n")
      nil helm-recentd-file nil 'silent)))
 
-(defun helm-recentd-init-load-file ()
+(defun helm-recentd--init-load-file ()
   (load helm-recentd-file t))
 
-(add-hook 'dired-mode-hook 'helm-recentd-save-to-list)
-(add-hook 'after-init-hook 'helm-recentd-init-load-file)
+(add-hook 'dired-mode-hook 'helm-recentd--save-to-list)
+(add-hook 'after-init-hook 'helm-recentd--init-load-file)
 
 ;; ----------------------------------------------------------------------
 ;; helm
+
+(defvar helm-recentd--action-default
+  '("Open in dired" . (lambda ($spec)
+                        (let (($dir (helm-recentd--get-target-string)))
+                          (if (file-directory-p $dir)
+                              (dired $dir)
+                            (error "%s is not directory" $dir))))))
+
+(defvar helm-recentd--action
+  (cons helm-recentd--action-default
+        (cond ((executable-find "xdg-open")
+               '(("Open in Nautilus for Linux"
+                  . (lambda ($spec) (or $spec (setq $spec nil))
+                      (shell-command (format "xdg-open %s"
+                                             (helm-recentd--get-target-string)))))
+                 ("Open in Terminal for Linux"
+                  . (lambda ($spec) (or $spec (setq $spec nil))
+                      (shell-command (format "gnome-terminal --working-directory %s"
+                                             (helm-recentd--get-target-string)))))))
+              ((executable-find "open")
+               '(("Open in Finder for Mac"
+                  . (lambda ($spec) (or $spec (setq $spec nil))
+                      (shell-command (format "open %s"
+                                             (helm-recentd--get-target-string)))))
+                 ("Open in iTerm2 for Mac"
+                  . (lambda ($spec) (or $spec (setq $spec nil))
+                      (shell-command (format "open -a iTerm %s"
+                                             (helm-recentd--get-target-string)))))
+                 ("Open in Terminal for Mac"
+                  . (lambda ($spec) (or $spec (setq $spec nil))
+                      (shell-command (format "open -a Terminal %s"
+                                             (helm-recentd--get-target-string)))))))
+              ((and (executable-find "explorer") (executable-find "start"))
+               '(("Open in Explorer for Windows"
+                  . (lambda ($spec) (or $spec (setq $spec nil))
+                      (format "start \"\" \"%s\"" (helm-recentd--get-target-string))))
+                 ("Open in Command Prompt for Windows"
+                  . (lambda ($spec) (or $spec (setq $spec nil))
+                      (shell-command (format "start cd \"%s\""
+                                             (helm-recentd--get-target-string))))))))))
+
 (defun helm-recentd--get-target-string ()
   "Get the directory path you chose from helm directory list"
   (with-current-buffer helm-buffer
@@ -115,26 +156,9 @@
      (1- (overlay-end helm-selection-overlay)))))
 
 (defun helm-c-source-recentd ()
-  '((name . "helm-recentd")
+  `((name . "helm-recentd")
     (candidates . helm-recentd-list)
-    (action ("Open in dired"
-             . (lambda ($spec)
-                 (let (($dir (helm-recentd--get-target-string)))
-                   (if (file-directory-p $dir)
-                       (dired $dir)
-                     (error "%s is not directory" $dir)))))
-            ("Open in Finder for Mac"
-             . (lambda ($spec) (or $spec (setq $spec nil))
-                 (shell-command (format "open %s"
-                                        (helm-recentd--get-target-string)))))
-            ("Open in iTerm2 for Mac"
-             . (lambda ($spec) (or $spec (setq $spec nil))
-                 (shell-command (format "open -a iTerm %s"
-                                        (helm-recentd--get-target-string)))))
-            ("Open in Terminal for Mac"
-             . (lambda ($spec) (or $spec (setq $spec nil))
-                 (shell-command (format "open -a Terminal %s"
-                                        (helm-recentd--get-target-string))))))))
+    (action ,@helm-recentd--action)))
 
 ;;;###autoload
 (defun helm-recentd (&optional $preinput)

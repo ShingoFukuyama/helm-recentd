@@ -1,6 +1,6 @@
 ## helm-recentd.el
 
-Keep directories you've opened in dired, even if you stop running Emacs!
+Keep directories history you've opened in dired, even if you stop running Emacs!
 
 ```elisp
 ;; Example
@@ -21,5 +21,5 @@ Keep directories you've opened in dired, even if you stop running Emacs!
 (global-set-key (kbd "C-x C-d") 'helm-recentd)
 ```
 
-### Option for Mac OSX
-While selecting directory path in helm interface, you can also choose where to open the directory by pressing [TAB] key, the options are, such as Finder, Terminal, or iTerm2, instead of opening in Emacs dired-mode.
+### Option for Mac OSX, Linux, Windows
+While selecting directory path in helm interface, you can also choose where to open the directory by pressing [TAB] key, the options are, such as Finder, Nautilus, Terminal, or iTerm2, Explorer, Command Prompt, instead of opening in Emacs dired-mode.
