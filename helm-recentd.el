@@ -77,15 +77,15 @@
                                  (format-time-string "%Y/%m/%d %H:%M" $time-stamp)
                                  'face 'font-lock-function-name-face)))
                        (list (1+ $times)
-                             (floor (time-to-seconds $time-stamp)))))
+                             (floor (float-time $time-stamp)))))
     ;; Sort by `helm-recentd-sort' (frequency, date)
     (if helm-recentd-sort
-        (setq helm-recentd-list (sort* (copy-sequence helm-recentd-list)
-                                  '> :key (lambda ($elms)
-                                            (nth (case helm-recentd-sort
-                                                   ('frequency 0)
-                                                   ('date 1))
-                                                 (cdr $elms)))))))
+        (setq helm-recentd-list (cl-sort (copy-sequence helm-recentd-list)
+                                         '> :key (lambda ($elms)
+                                                   (nth (case helm-recentd-sort
+                                                          ('frequency 0)
+                                                          ('date 1))
+                                                        (cdr $elms)))))))
   (helm-recentd-save-to-file))
 
 (defun helm-recentd-save-to-file ()
@@ -113,7 +113,7 @@
 
 (defun helm-c-source-recentd ()
   '((name . "helm-recentd")
-    (candidates . recentd-list)
+    (candidates . helm-recentd-list)
     (action ("Open in dired"
              . (lambda ($spec)
                  (let (($dir (helm-recentd--get-target-string)))
@@ -141,5 +141,7 @@
         :input (or $preinput "")
         :prompt "Directory name: "
         :candidate-number-limit 255))
+
+(provide 'helm-recentd)
 
 ;;; helm-recentd.el ends here
