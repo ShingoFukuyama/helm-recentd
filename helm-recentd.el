@@ -50,12 +50,12 @@
 (defvar helm-recentd-coding-system 'utf-8)
 
 (defcustom helm-recentd-file (concat "~/.helm-recentd" "-" user-full-name)
-  "Split window when having multiple windows open"
+  "File path for helm-recentd"
   :group 'helm-recentd
   :type 'string)
 
 (defcustom helm-recentd-sort 'date
- "Split direction"
+ "Sort directory list by `date' or `frequency'"
  :type '(choice (const :tag "Sort by date"      'date)
                 (const :tag "Sort by frequency" 'frequency))
  :group 'helm-recentd)
@@ -136,6 +136,7 @@
 ;;;###autoload
 (defun helm-recentd (&optional $preinput)
   (interactive)
+  "Show all directory that you have ever visited."
   (helm :sources (helm-c-source-recentd)
         :buffer "*helm-recentd*"
         :input (or $preinput "")
