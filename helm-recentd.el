@@ -108,45 +108,57 @@
 ;; ----------------------------------------------------------------------
 ;; helm
 
+(defvar helm-recentd-map
+  (let (($map (make-sparse-keymap)))
+    (set-keymap-parent $map helm-map)
+    (define-key $map (kbd "M-j") 'helm-select-4rd-action)
+    (delq nil $map))
+  "Keymap for helm-recentd")
+
 (defvar helm-recentd--action-default
-  '("Open in dired" . (lambda ($spec)
+  '(("Open in dired" . (lambda (ignored)
                         (let (($dir (helm-recentd--get-target-string)))
                           (if (file-directory-p $dir)
                               (dired $dir)
-                            (error "%s is not directory" $dir))))))
+                            (error "%s is not directory" $dir)))))
+    ("Copy path" . (lambda (ignored)
+                     (let (($dir (helm-recentd--get-target-string))))
+                     (kill-new $dir)
+                     (message "Copied: %s" $dir)))))
 
 (defvar helm-recentd--action
-  (cons helm-recentd--action-default
-        (cond ((executable-find "xdg-open")
-               '(("Open in Nautilus for Linux"
-                  . (lambda ($spec) (or $spec (setq $spec nil))
-                      (shell-command (format "xdg-open %s"
-                                             (helm-recentd--get-target-string)))))
-                 ("Open in Terminal for Linux"
-                  . (lambda ($spec) (or $spec (setq $spec nil))
-                      (shell-command (format "gnome-terminal --working-directory %s"
-                                             (helm-recentd--get-target-string)))))))
-              ((executable-find "open")
-               '(("Open in Finder for Mac"
-                  . (lambda ($spec) (or $spec (setq $spec nil))
-                      (shell-command (format "open %s"
-                                             (helm-recentd--get-target-string)))))
-                 ("Open in iTerm2 for Mac"
-                  . (lambda ($spec) (or $spec (setq $spec nil))
-                      (shell-command (format "open -a iTerm %s"
-                                             (helm-recentd--get-target-string)))))
-                 ("Open in Terminal for Mac"
-                  . (lambda ($spec) (or $spec (setq $spec nil))
-                      (shell-command (format "open -a Terminal %s"
-                                             (helm-recentd--get-target-string)))))))
-              ((and (executable-find "explorer") (executable-find "start"))
-               '(("Open in Explorer for Windows"
-                  . (lambda ($spec) (or $spec (setq $spec nil))
-                      (format "start \"\" \"%s\"" (helm-recentd--get-target-string))))
-                 ("Open in Command Prompt for Windows"
-                  . (lambda ($spec) (or $spec (setq $spec nil))
-                      (shell-command (format "start cd \"%s\""
-                                             (helm-recentd--get-target-string))))))))))
+  (append
+   helm-recentd--action-default
+   (cond ((executable-find "xdg-open")
+          '(("Open in Nautilus"
+             . (lambda (ignored)
+                 (shell-command (format "xdg-open %s"
+                                        (helm-recentd--get-target-string)))))
+            ("Open in Terminal"
+             . (lambda (ignored)
+                 (shell-command (format "gnome-terminal --working-directory %s"
+                                        (helm-recentd--get-target-string)))))))
+         ((executable-find "open")
+          '(("Open in Finder"
+             . (lambda (ignored)
+                 (shell-command (format "open %s"
+                                        (helm-recentd--get-target-string)))))
+            ("Open in iTerm2"
+             . (lambda (ignored)
+                 (shell-command (format "open -a iTerm %s"
+                                        (helm-recentd--get-target-string)))))
+            ("Open in Terminal"
+             . (lambda (ignored)
+                 (shell-command (format "open -a Terminal %s"
+                                        (helm-recentd--get-target-string)))))))
+         ((and (executable-find "explorer") (executable-find "start"))
+          '(("Open in Explorer"
+             . (lambda (ignored)
+                 (format "start \"\" \"%s\"" (helm-recentd--get-target-string))))
+            ("Open in Command Prompt"
+             . (lambda (ignored)
+                 (shell-command (format "start cd \"%s\""
+                                        (helm-recentd--get-target-string))))))))))
 
 (defun helm-recentd--get-target-string ()
   "Get the directory path you chose from helm directory list"
@@ -158,7 +170,9 @@
 (defun helm-c-source-recentd ()
   `((name . "helm-recentd")
     (candidates . helm-recentd-list)
-    (action ,@helm-recentd--action)))
+    (action ,@helm-recentd--action)
+    (keymap . ,helm-recentd-map)
+    (header-line . "Press [TAB]: Show more options")))
 
 ;;;###autoload
 (defun helm-recentd (&optional $preinput)
