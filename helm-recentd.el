@@ -41,7 +41,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'helm)
 
 (defgroup helm-recentd nil
@@ -85,7 +85,7 @@
     (if helm-recentd-sort
         (setq helm-recentd-list (cl-sort (copy-sequence helm-recentd-list)
                                          '> :key (lambda ($elms)
-                                                   (nth (case helm-recentd-sort
+                                                   (nth (cl-case helm-recentd-sort
                                                           ('frequency 0)
                                                           ('date 1))
                                                         (cdr $elms)))))))
