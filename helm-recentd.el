@@ -80,7 +80,7 @@
                                  (format-time-string "%Y/%m/%d %H:%M" $time-stamp)
                                  'face 'font-lock-function-name-face)))
                        (list (1+ $times)
-                             (floor (float-time $time-stamp)))))
+                             (float-time $time-stamp))))
     ;; Sort by `helm-recentd-sort' (frequency, date)
     (if helm-recentd-sort
         (setq helm-recentd-list (cl-sort (copy-sequence helm-recentd-list)
