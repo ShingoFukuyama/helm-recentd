@@ -122,9 +122,9 @@
                               (dired $dir)
                             (error "%s is not directory" $dir)))))
     ("Copy path" . (lambda (ignored)
-                     (let (($dir (helm-recentd--get-target-string))))
-                     (kill-new $dir)
-                     (message "Copied: %s" $dir)))))
+                     (let (($dir (helm-recentd--get-target-string)))
+                       (kill-new $dir)
+                       (message "Copied: %s" $dir))))))
 
 (defvar helm-recentd--action
   (append
