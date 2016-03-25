@@ -126,6 +126,10 @@
                        (kill-new $dir)
                        (message "Copied: %s" $dir))))))
 
+(defun helm-recentd-open-in-terminal (ignored)
+  (start-process "gnome-terminal" nil "gnome-terminal" "--working-directory"
+                 (helm-recentd--get-target-string)))
+
 (defvar helm-recentd--action
   (append
    helm-recentd--action-default
@@ -134,10 +138,7 @@
              . (lambda (ignored)
                  (shell-command (format "xdg-open %s"
                                         (helm-recentd--get-target-string)))))
-            ("Open in Terminal"
-             . (lambda (ignored)
-                 (shell-command (format "gnome-terminal --working-directory %s"
-                                        (helm-recentd--get-target-string)))))))
+            ("Open in Terminal" . helm-recentd-open-in-terminal)))
          ((executable-find "open")
           '(("Open in Finder"
              . (lambda (ignored)
@@ -147,10 +148,7 @@
              . (lambda (ignored)
                  (shell-command (format "open -a iTerm %s"
                                         (helm-recentd--get-target-string)))))
-            ("Open in Terminal"
-             . (lambda (ignored)
-                 (shell-command (format "open -a Terminal %s"
-                                        (helm-recentd--get-target-string)))))))
+            ("Open in Terminal" . helm-recentd-open-in-terminal)))
          ((and (executable-find "explorer") (executable-find "start"))
           '(("Open in Explorer"
              . (lambda (ignored)
