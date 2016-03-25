@@ -117,10 +117,10 @@
 
 (defvar helm-recentd--action-default
   '(("Open in dired" . (lambda (ignored)
-                        (let (($dir (helm-recentd--get-target-string)))
-                          (if (file-directory-p $dir)
-                              (dired $dir)
-                            (error "%s is not directory" $dir)))))
+                         (let (($dir (helm-recentd--get-target-string)))
+                           (if (file-directory-p $dir)
+                               (dired $dir)
+                             (error "%s is not directory" $dir)))))
     ("Copy path" . (lambda (ignored)
                      (let (($dir (helm-recentd--get-target-string)))
                        (kill-new $dir)
