@@ -58,10 +58,10 @@
   :type 'string)
 
 (defcustom helm-recentd-sort 'date
- "Sort directory list by `date' or `frequency'"
- :type '(choice (const :tag "Sort by date"      'date)
-                (const :tag "Sort by frequency" 'frequency))
- :group 'helm-recentd)
+  "Sort directory list by `date' or `frequency'"
+  :type '(choice (const :tag "Sort by date"      'date)
+                 (const :tag "Sort by frequency" 'frequency))
+  :group 'helm-recentd)
 
 (defun helm-recentd--save-to-list ()
   (let* (($dir (expand-file-name default-directory))
