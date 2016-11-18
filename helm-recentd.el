@@ -166,11 +166,11 @@
      (1- (overlay-end helm-selection-overlay)))))
 
 (defun helm-c-source-recentd ()
-  `((name . "helm-recentd")
-    (candidates . helm-recentd-list)
-    (action ,@helm-recentd--action)
-    (keymap . ,helm-recentd-map)
-    (header-line . "Press [TAB]: Show more options")))
+  (helm-build-sync-source "helm-recentd"
+    :candidates helm-recentd-list
+    :action helm-recentd--action
+    :keymap helm-recentd-map
+    :header-line "Press [TAB]: Show more options"))
 
 ;;;###autoload
 (defun helm-recentd (&optional $preinput)
