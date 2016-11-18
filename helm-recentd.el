@@ -63,6 +63,11 @@
                  (const :tag "Sort by frequency" 'frequency))
   :group 'helm-recentd)
 
+(defcustom helm-recentd-fuzzy-match t
+  "Enable fuzzy matching."
+  :group 'helm-recentd
+  :type 'boolean)
+
 (defun helm-recentd--save-to-list ()
   (let* (($dir (expand-file-name default-directory))
          ($cons (assoc $dir helm-recentd-list))
@@ -168,6 +173,7 @@
 (defun helm-c-source-recentd ()
   (helm-build-sync-source "helm-recentd"
     :candidates helm-recentd-list
+    :fuzzy-match helm-recentd-fuzzy-match
     :action helm-recentd--action
     :keymap helm-recentd-map
     :header-line "Press [TAB]: Show more options"))
