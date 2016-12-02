@@ -63,7 +63,7 @@
                  (const :tag "Sort by frequency" 'frequency))
   :group 'helm-recentd)
 
-(defcustom helm-recentd-fuzzy-match t
+(defcustom helm-recentd-fuzzy-match nil
   "Enable fuzzy matching."
   :group 'helm-recentd
   :type 'boolean)
