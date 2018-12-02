@@ -69,6 +69,7 @@
   :type 'boolean)
 
 (defun helm-recentd--save-to-list ()
+  (set-text-properties 0 (length default-directory) nil default-directory)
   (let* (($dir (expand-file-name default-directory))
          ($cons (assoc $dir helm-recentd-list))
          ($times (or (cadr $cons) 0))
