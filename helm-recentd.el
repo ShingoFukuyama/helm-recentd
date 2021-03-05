@@ -101,7 +101,8 @@
   (let ((coding-system-for-write helm-recentd-coding-system))
     (write-region
      (concat "(setq helm-recentd-list '"
-             (prin1-to-string helm-recentd-list)
+             (let (print-length)
+               (prin1-to-string helm-recentd-list))
              ")\n")
      nil helm-recentd-file nil 'silent)))
 
