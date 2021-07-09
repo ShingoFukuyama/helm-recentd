@@ -58,12 +58,18 @@
   :type 'string)
 
 (defcustom helm-recentd-sort 'date
- "Sort directory list by `date' or `frequency'"
- :type '(choice (const :tag "Sort by date"      'date)
-                (const :tag "Sort by frequency" 'frequency))
- :group 'helm-recentd)
+  "Sort directory list by `date' or `frequency'"
+  :type '(choice (const :tag "Sort by date"      'date)
+                 (const :tag "Sort by frequency" 'frequency))
+  :group 'helm-recentd)
+
+(defcustom helm-recentd-fuzzy-match nil
+  "Enable fuzzy matching."
+  :group 'helm-recentd
+  :type 'boolean)
 
 (defun helm-recentd--save-to-list ()
+  (set-text-properties 0 (length default-directory) nil default-directory)
   (let* (($dir (expand-file-name default-directory))
          ($cons (assoc $dir helm-recentd-list))
          ($times (or (cadr $cons) 0))
@@ -95,7 +101,8 @@
   (let ((coding-system-for-write helm-recentd-coding-system))
     (write-region
      (concat "(setq helm-recentd-list '"
-             (prin1-to-string helm-recentd-list)
+             (let (print-length)
+               (prin1-to-string helm-recentd-list))
              ")\n")
      nil helm-recentd-file nil 'silent)))
 
@@ -117,14 +124,18 @@
 
 (defvar helm-recentd--action-default
   '(("Open in dired" . (lambda (ignored)
-                        (let (($dir (helm-recentd--get-target-string)))
-                          (if (file-directory-p $dir)
-                              (dired $dir)
-                            (error "%s is not directory" $dir)))))
+                         (let (($dir (helm-recentd--get-target-string)))
+                           (if (file-directory-p $dir)
+                               (dired $dir)
+                             (error "%s is not directory" $dir)))))
     ("Copy path" . (lambda (ignored)
                      (let (($dir (helm-recentd--get-target-string)))
                        (kill-new $dir)
                        (message "Copied: %s" $dir))))))
+
+(defun helm-recentd-open-in-terminal (ignored)
+  (start-process "gnome-terminal" nil "gnome-terminal" "--working-directory"
+                 (helm-recentd--get-target-string)))
 
 (defvar helm-recentd--action
   (append
@@ -134,10 +145,7 @@
              . (lambda (ignored)
                  (shell-command (format "xdg-open %s"
                                         (helm-recentd--get-target-string)))))
-            ("Open in Terminal"
-             . (lambda (ignored)
-                 (shell-command (format "gnome-terminal --working-directory %s"
-                                        (helm-recentd--get-target-string)))))))
+            ("Open in Terminal" . helm-recentd-open-in-terminal)))
          ((executable-find "open")
           '(("Open in Finder"
              . (lambda (ignored)
@@ -147,10 +155,7 @@
              . (lambda (ignored)
                  (shell-command (format "open -a iTerm %s"
                                         (helm-recentd--get-target-string)))))
-            ("Open in Terminal"
-             . (lambda (ignored)
-                 (shell-command (format "open -a Terminal %s"
-                                        (helm-recentd--get-target-string)))))))
+            ("Open in Terminal" . helm-recentd-open-in-terminal)))
          ((and (executable-find "explorer") (executable-find "start"))
           '(("Open in Explorer"
              . (lambda (ignored)
@@ -168,11 +173,12 @@
      (1- (overlay-end helm-selection-overlay)))))
 
 (defun helm-c-source-recentd ()
-  `((name . "helm-recentd")
-    (candidates . helm-recentd-list)
-    (action ,@helm-recentd--action)
-    (keymap . ,helm-recentd-map)
-    (header-line . "Press [TAB]: Show more options")))
+  (helm-build-sync-source "helm-recentd"
+    :candidates helm-recentd-list
+    :fuzzy-match helm-recentd-fuzzy-match
+    :action helm-recentd--action
+    :keymap helm-recentd-map
+    :header-line "Press [TAB]: Show more options"))
 
 ;;;###autoload
 (defun helm-recentd (&optional $preinput)
